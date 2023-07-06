@@ -24,22 +24,50 @@ BOOL dlgs_selectfile(HWND hWnd, const FILESEL *item,
 
 	OPENFILENAME	ofn;
 
+	TCHAR filename_[MAX_PATH];
+	TCHAR filepath_[MAX_PATH];
+
 	if ((item == NULL) || (path == NULL) || (size == 0)) {
 		return(FALSE);
 	}
+	lstrcpy(filepath_, path);
+	lstrcpy(filename_, path);
+
+	int i = 0;
+	int j = -1;
+
+	while(filepath_[i] != TEXT('\0'))
+	{
+		if(filepath_[i] == TEXT('\\'))
+		{
+			j = i;
+		}
+		i++;
+	}
+
+	int x = 0;
+	for (i = j+1; filepath_[i] != TEXT('\0'); i++)
+	{
+		filename_[x++] = filepath_[i];
+	}
+	filename_[x++] = TEXT('\0');
+	filepath_[j+1] = TEXT('\0');
+
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.hwndOwner = hWnd;
 	ofn.lpstrFilter = item->filter;
 	ofn.nFilterIndex = item->defindex;
-	ofn.lpstrFile = path;
+	ofn.lpstrFile = filename_;
 	ofn.nMaxFile = size;
+	ofn.lpstrInitialDir = filepath_;
 	ofn.Flags = OFN_FILEMUSTEXIST;
 	ofn.lpstrDefExt = item->ext;
 	ofn.lpstrTitle = item->title;
 	if (!GetOpenFileName(&ofn)) {
 		return(FALSE);
 	}
+	lstrcpy(path, filename_);
 	if (ro) {
 		*ro = ofn.Flags & OFN_READONLY;
 	}
@@ -51,22 +79,50 @@ BOOL dlgs_selectwritefile(HWND hWnd, const FILESEL *item,
 
 	OPENFILENAME	ofn;
 
+	TCHAR filename_[MAX_PATH];
+	TCHAR filepath_[MAX_PATH];
+
 	if ((item == NULL) || (path == NULL) || (size == 0)) {
 		return(FALSE);
 	}
+	lstrcpy(filepath_, path);
+	lstrcpy(filename_, path);
+
+	int i = 0;
+	int j = -1;
+
+	while(filepath_[i] != TEXT('\0'))
+	{
+		if(filepath_[i] == TEXT('\\'))
+		{
+			j = i;
+		}
+		i++;
+	}
+
+	int x = 0;
+	for (i = j+1; filepath_[i] != TEXT('\0'); i++)
+	{
+		filename_[x++] = filepath_[i];
+	}
+	filename_[x++] = TEXT('\0');
+	filepath_[j+1] = TEXT('\0');
+
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.hwndOwner = hWnd;
 	ofn.lpstrFilter = item->filter;
 	ofn.nFilterIndex = item->defindex;
-	ofn.lpstrFile = path;
+	ofn.lpstrFile = filename_;
 	ofn.nMaxFile = size;
+	ofn.lpstrInitialDir = filepath_;
 	ofn.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
 	ofn.lpstrDefExt = item->ext;
 	ofn.lpstrTitle = item->title;
 	if (!GetSaveFileName(&ofn)) {
 		return(FALSE);
 	}
+	lstrcpy(path, filename_);
 	return(TRUE);
 }
 
@@ -152,8 +208,8 @@ void dlgs_drawbmp(HDC hdc, UINT8 *bmp) {
 	if (bmpdata_getinfo(bi, &inf) != SUCCESS) {
 		goto dsdb_err1;
 	}
-	hbmp = CreateDIBSection(hdc, (BITMAPINFO *)bi, DIB_RGB_COLORS,
-												(void **)&image, NULL, 0);
+	//hbmp = CreateDIBSection(hdc, (BITMAPINFO *)bi, DIB_RGB_COLORS,
+	//											(void **)&image, NULL, 0);
 	if (hbmp == NULL) {
 		goto dsdb_err1;
 	}
